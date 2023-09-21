@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .info span {
+        color: red;
+        margin: 0 0.5vw;
+      }
+
+      .base-el {
+        position: absolute;
+        border: 1px solid #000;
+        color: #fff;
+        background-color: #000;
+        width: 40px;
+        height: 40px;
+        text-align: center;
+        line-height: 40px;
+        font-size: 30px;
+        border-radius: 8%;
+        cursor: none;
+        user-select: none;
+      }
+
+      .hero {
+        border-color: red;
+        color: #fff;
+        background-color: red;
+      }
+
+      .qiong {
+        position: absolute;
+        width: 100%;
+        left: 0;
+        top: 200px;
+        display: none;
+        font-size: 10vw;
+        font-weight: bold;
+        color: red;
+        text-align: center;
+        background-color: #fff;
+        border: 1px solid #000;
+      }
+
+      .info {
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 998;
+      }
+
+      .full {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        /* border: 2px solid red; */
+        background-color: #fff;
+        z-index: 999;
+        display: none;
+      }
+
+      .fan {
+        background-color: #000;
+        color: #eee;
+        font-size: 4vw;
+      }
+
+      .start-page {
+        padding: 10vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .start-page > div {
+        margin-bottom: 10vh;
+      }
+
+      .mt--9 {
+        /* margin-top: -9vh; */
+      }
+
+      .start-btn {
+        width: 80vmin;
+        padding: 3vh;
+        border: 1px solid #fff;
+        border-radius: 2vw;
+        text-align: center;
+        font-size: 5vmin;
+        color: red;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+      }
+
+      .qs,
+      .ying {
+        padding: 10vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .re-btn {
+        width: 50vmin;
+        padding: 3vh;
+        border: 1px solid #fff;
+        border-radius: 2vw;
+        text-align: center;
+        font-size: 5vmin;
+        color: #fff;
+        cursor: pointer;
+        margin-top: 8vh;
+      }
+
+      .box {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        background: #f1f1f1;
+      }
+
+      .mt-10 {
+        margin-top: 10vh;
+      }
+
+      .red {
+        color: red;
+        margin-top: 4vh;
+      }
+
+      @media screen and (max-width: 750px) {
+        .fan {
+          font-size: 5vmin;
+        }
+
+        .fz-2vh {
+          font-size: 3vmin;
+        }
+      }
+
+      @media screen and (min-width: 750px) and (max-width: 1024px) {
+        .fan {
+          font-size: 3vmin;
+        }
+
+        .fz-2vh {
+          font-size: 3vmin;
+        }
+      }
+
+      @media screen and (min-width: 1024px) {
+        .fan {
+          font-size: 5vmin;
+        }
+      }
+
+      .zan {
+        color: red;
+        position: absolute;
+        left: 0;
+        top: 5px;
+        font-size: 16px;
+        font-weight: bold;
+
+        animation: colorChange 1s infinite steps(1), qh 0.5s infinite;
+      }
+
+      @keyframes colorChange {
+        50% {
+          color: yellow;
+        }
+      }
+
+      @keyframes qh {
+        50% {
+          transform: translate(20px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!--   
+  点击 + 收藏！ 
+  游戏设计：
+        1、游戏角色：
+        2、游戏关卡：
+        3、游戏玩法：
+        4、游戏文案：
+    
+    1. 游戏角色：
+        1.1  角色基类： Role (position, update, move)
+        1.2  英雄子类   Hero (重写move)
+        1.3  敌人子类   Enemy(重写move)
+        1.4  游戏管理类  Contorl (场控，开始游戏，结束游戏， 关卡升级、场景切换， 碰撞检测、三角函数转换，测距)
+    2. 游戏关卡：
+        2.1 关卡升级后，每秒出现的敌人数+1, 无限模式 
+        如： 第1关， 美秒出现1个敌人
+        如： 第2关， 美秒出现2个敌人
+        ....
+    3. 游戏玩法：
+        3.1 点击页面空白出现，让英雄移动，躲避敌人，被敌人追上即为游戏失败
+        3.2 成功坚持30s,即可进入下一个关
+    4. 游戏文案：
+        4.1 游戏背景介绍：
+            2023以来,伴随的大厂的裁员潮、工作难找， 年终奖2折起， 作为程序员的我们真的快穷死了！
+            但你我皆清楚，程序员无所不能！上能顶天立地，下能苟且偷生，快来一起战斗, 躲避穷鬼， 坚持30秒，走上高富帅，取下白富美！
+        4.2 游戏失败文案：
+            哎呀，你穷死了!!!（注意这里一定是三个感叹号，有挑衅的意思，激发玩家的胜负欲，涉及游戏心理学）
+        4.3 游戏通关文案：
+            通关后，给玩家吟诗一首： 《有钱》
+                财大气粗、不当土狗
+                青春永驻、朱门绣户
+                头发多多、一路高歌
+                要啥都有、 永垂不朽
+
+    已用尽了作者必胜的才华！ 
+    -->
+
+    <div class="info">
+      关卡：<span class="level">1</span> 敌人：<span class="e-num">1</span>
+      时间：<span class="time-span">60s</span>
+    </div>
+
+    <div class="ying full fan">
+      <div class="zan">&lt;-我不停的动，点个赞呗！</div>
+      <div>恭喜！赢了！</div>
+      <div>2023愿你：</div>
+      <div class="mt-10 red">财大气粗、不当土狗</div>
+      <div class="mt-10 red">青春永驻、朱门绣户</div>
+      <div class="mt-10 red">头发多多、一路高歌</div>
+      <div class="mt-10 red">要啥都有、 永垂不朽</div>
+      <div class="rebtn1 re-btn">挑战下一关</div>
+    </div>
+    <div class="start-page full fan">
+      <div class="zan">&lt;-我不停的动，点个赞呗！</div>
+      <div>
+        2023以来,伴随的大厂的裁员潮、工作难找， 年终奖2折起，
+        作为程序员的我们真的快穷死了！
+      </div>
+      <div>
+        但你我皆清楚，程序员无所不能！上能顶天立地，下能苟且偷生，快来一起战斗,
+        躲避穷鬼， 坚持30秒，走上高富帅，取下白富美！
+      </div>
+      <div class="start-btn">开始游戏</div>
+      <div class="mt--9 fz-2vh">
+        操作方式：点击空白处，即可躲避 【挑战<span style="color: red">999</span
+        >关】
+      </div>
+    </div>
+    <div class="qiong full fan qs">
+      <div class="zan">&lt;-我不停的动，点个赞呗！</div>
+      <div>哎呀，你穷死了!!!!</div>
+      <div class="rebtn2 re-btn">再次挑战！</div>
+    </div>
+    <div class="box"></div>
+    <script>
+      /**
+      点击 + 收藏！ 
+      游戏设计：
+        1、游戏角色：
+        2、游戏关卡：
+        3、游戏玩法：
+        4、游戏文案：
+    
+    1. 游戏角色：
+        1.1  角色基类： Role (position, update, move)
+        1.2  英雄子类   Hero (重写move)
+        1.3  敌人子类   Enemy(重写move)
+        1.4  游戏管理类  Contorl (场控，开始游戏，结束游戏， 关卡升级、场景切换， 碰撞检测、三角函数转换，测距)
+    2. 游戏关卡：
+        2.1 关卡升级后，每秒出现的敌人数+1 
+        如： 第1关， 美秒出现1个敌人
+        如： 第2关， 美秒出现2个敌人
+        ....
+    3. 游戏玩法：
+        3.1 点击页面空白出现，让英雄移动，躲避敌人，被敌人追上即为游戏失败
+        3.2 成功坚持30s,即可进入下一个关
+    4. 游戏文案：
+        4.1 游戏背景介绍：
+            2023以来,伴随的大厂的裁员潮、工作难找， 年终奖2折起， 作为程序员的我们真的快穷死了！
+            但你我皆清楚，程序员无所不能！上能顶天立地，下能苟且偷生，快来一起战斗, 躲避穷鬼， 坚持30秒，走上高富帅，取下白富美！
+        4.2 游戏失败文案：
+            哎呀，你穷死了!!!（注意这里一定是三个感叹号，有挑衅的意思，激发玩家的胜负欲，涉及游戏心理学）
+        4.3 游戏通关文案：
+            通关后，给玩家吟诗一首： 《有钱》
+                财大气粗、不当土狗
+                青春永驻、朱门绣户
+                头发多多、一路高歌
+                要啥都有、 永垂不朽
+
+    已用尽了作者必胜的才华！
+  */
+
+      let qiong = document.querySelector(".qiong");
+      let eNum = document.querySelector(".e-num");
+      let timeSpan = document.querySelector(".time-span");
+      let startPage = document.querySelector(".start-page");
+      let ying = document.querySelector(".ying");
+      let startBtn = document.querySelector(".start-btn");
+      let reBtn1 = document.querySelector(".rebtn1");
+      let reBtn2 = document.querySelector(".rebtn2");
+      let box = document.querySelector(".box");
+      let levelDiv = document.querySelector(".level");
+
+      let endTime = 30;
+      let level = 1;
+
+      const W = document.body.clientWidth;
+      const H = document.body.clientHeight;
+      const divW = 40;
+
+      class Role {
+        constructor(x, y) {
+          this.x = x || 0;
+          this.y = y || 0;
+        }
+
+        // div
+        div = null;
+
+        updateStyle() {
+          this.div.style.left = `${this.x}px`;
+          this.div.style.top = `${this.y}px`;
+        }
+      }
+
+      class Enemy extends Role {
+        constructor(x, y) {
+          super(x, y);
+          this.div = getDiv("穷");
+          this.updateStyle();
+        }
+
+        // target
+        targetPosition = {};
+
+        // 角度（弧度)
+        radian = null;
+
+        // 每次移动的距离
+        moveDis = 3;
+
+        isMove = true;
+
+        move(hero) {
+          if (!this.isMove) return;
+          // 记录角度
+          if (
+            this.targetPosition.x != hero.x ||
+            this.targetPosition.y != hero.y ||
+            this.radian === null
+          ) {
+            // 英雄移动过
+            this.radian = getRadian(this.x, this.y, hero.x, hero.y);
+            // this.radian = getRadian( hero.x, hero.y, this.x, this.y);
+
+            this.targetPosition.x = hero.x;
+            this.targetPosition.y = hero.y;
+          }
+          // 当前距离
+          let currentDis = getDistance(this.x, this.y, hero.x, hero.y);
+          // 减去每次移动距离 - moveDis
+          // 计算新位置
+          // 计算出新的位置
+          this.x = Math.cos(this.radian) * (currentDis - this.moveDis);
+          this.y = Math.sin(this.radian) * (currentDis - this.moveDis);
+
+          this.x = hero.x - this.x;
+          this.y = hero.y - this.y;
+
+          this.updateStyle();
+        }
+      }
+
+      class Hero extends Role {
+        constructor(x, y) {
+          super(x, y);
+          this.div = getDiv("我", "hero");
+          this.updateStyle();
+        }
+
+        move(x, y) {
+          this.x = x;
+          this.y = y;
+          this.updateStyle();
+        }
+      }
+
+      let hero = null;
+      let emenys = [];
+      let num = 0;
+      let timer = null;
+      let time = 0;
+
+      function start() {
+        let isM = false;
+        hero = new Hero(W / 2, H / 2);
+        heroMove(hero, isM);
+        let initTime = Date.now();
+        time = 0;
+        eNum.innerHTML = 1;
+        timeSpan.innerHTML = 0;
+        timer = setInterval(() => {
+          let time = Date.now() - initTime;
+          time = (time / 1000).toFixed(2);
+          console.log("time:", time);
+          if (time > endTime) {
+            stop();
+            showYing();
+          }
+          timeSpan.innerHTML = time;
+
+          num += 30;
+          if (num % 400 === 0 && emenys.length < 500) {
+            for (let i = 0; i < level; i++) {
+              emenys.push(createEnemy());
+            }
+            eNum.innerHTML = emenys.length;
+          }
+          emenys.forEach((e) => {
+            e.move(hero);
+            if (collision(hero, e)) {
+              stop();
+              showQiong();
+            }
+          });
+        }, 30);
+      }
+
+      function stop() {
+        clearInterval(timer);
+        timer = null;
+        emenys = [];
+        time = 0;
+        box.innerHTML = "";
+      }
+
+      function createEnemy() {
+        let p = getPosition(hero);
+        return new Enemy(p.x, p.y);
+      }
+
+      function getPosition(hero) {
+        if (!W) {
+          W = document.body.clientWidth;
+        }
+        if (!H) {
+          H = document.body.clientHeight;
+        }
+        let x = getRand(W);
+        let y = getRand(H);
+        let dis = getDistance(hero.x, hero.y, x, y);
+        if (dis > 500 || dis <= 80) {
+          return getPosition(hero);
+        }
+        return {
+          x,
+          y,
+        };
+      }
+
+      function getDiv(text, className) {
+        let div = document.createElement("div");
+        div.classList.add("base-el");
+        div.innerText = text;
+        className && div.classList.add(className);
+        box.appendChild(div);
+        return div;
+      }
+
+      function getRand(max, min = 0) {
+        return min + parseInt(Math.random() * (max - min));
+      }
+
+      // 用到的函数 Math.atan2(y, x); 这里是先写入y的坐标, 在写入x的坐标, 不要写反了
+
+      // 获取两点之的弧度
+      function getRadian(x2, y2, x1, y1) {
+        return Math.atan2(y1 - y2, x1 - x2); // 返回来的是弧度
+        // let radian =  Math.atan2(y1 - y2, x1 - x2);
+        // return  180 / Math.PI * radian;
+      }
+
+      // 获取两点之间的距离
+      function getDistance(x1, y1, x2, y2) {
+        let dx = Math.abs(x1 - x2);
+        let dy = Math.abs(y1 - y2);
+        return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+      }
+
+      window.onclick = function (e) {
+        console.log(e);
+        hero.move(e.pageX - divW / 2, e.pageY - divW / 2);
+      };
+
+      // 碰撞检测
+      function collision(o1, o2) {
+        let dtop = o1.y - divW;
+        let dbottom = o1.y + divW;
+        let dleft = o1.x - divW;
+        let dright = o1.x + divW;
+
+        if (
+          o2.x >= dleft &&
+          o2.x <= dright &&
+          o2.y >= dtop &&
+          o2.y <= dbottom
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+
+      function show(el) {
+        el.style.display = "flex";
+      }
+
+      function hide(el) {
+        el.style.display = "none";
+      }
+
+      function showStart() {
+        show(startPage);
+        hide(qiong);
+        hide(ying);
+      }
+
+      function showQiong() {
+        hide(startPage);
+        show(qiong);
+        hide(ying);
+      }
+
+      function showYing() {
+        hide(startPage);
+        hide(qiong);
+        show(ying);
+      }
+
+      function heroMove(hero, isM) {
+        box.onmousedown = function () {
+          isM = true;
+        };
+        box.onmouseup = function () {
+          isM = false;
+        };
+        box.onmousemove = function (e) {
+          if (isM) {
+            console.log(e);
+            hero.move(e.pageX, e.pageY);
+          }
+        };
+      }
+
+      startBtn.onclick = function (e) {
+        e.stopPropagation();
+        hide(startPage);
+        start();
+      };
+
+      function reStart(e) {
+        console.log("e", e);
+        e.stopPropagation();
+        hide(startPage);
+        hide(qiong);
+        hide(ying);
+        start();
+      }
+      reBtn1.onclick = function (e) {
+        ++level;
+        reStart(e);
+        setLevel();
+      };
+      reBtn2.onclick = reStart;
+
+      function setLevel() {
+        levelDiv.innerHTML = level;
+      }
+
+      showStart();
+    </script>
+  </body>
+</html>
